@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
+    public float jumpForce = 5f;
+
     private Rigidbody rb;
     public Transform CameraTransform;
     private ObjInteract CurrentObjInteract;
@@ -21,15 +23,24 @@ public class PlayerMovement : MonoBehaviour
         float moveZ = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = CameraTransform.forward * moveZ + CameraTransform.right * moveX;
-        moveDirection.y = 0;
+        moveDirection.y = 0; // No queremos que el movimiento del jugador sea afectado por la dirección de la cámara en el eje Y
 
-        rb.velocity = moveDirection.normalized * moveSpeed;
+        // Calculamos la nueva velocidad, pero mantenemos la componente vertical de la velocidad actual
+        Vector3 newVelocity = moveDirection.normalized * moveSpeed;
+        newVelocity.y = rb.velocity.y; // Mantener la componente vertical de la velocidad
 
-        if (Input.GetKey(KeyCode.E) && CurrentObjInteract)
+        rb.velocity = newVelocity;
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            CurrentObjInteract.Interact();
+            Jump();
         }
     }
+    private void Jump()
+    {
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
+
 
     public void SetInteractableObject(ObjInteract intObj)
     {
